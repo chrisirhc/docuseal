@@ -64,6 +64,7 @@ class AccountConfig < ApplicationRecord
   TEMPLATE_BUILDER_AUTOSAVE_KEY = 'template_builder_autosave'
   POLICY_LINKS_KEY = 'policy_links'
   ENABLE_MCP_KEY = 'enable_mcp'
+  RECORD_FIELD_DETECTIONS_KEY = 'record_field_detections'
 
   EMAIL_VARIABLES = {
     SUBMITTER_INVITATION_EMAIL_KEY => %w[template.name submitter.link account.name].freeze,

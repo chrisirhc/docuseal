@@ -3907,6 +3907,7 @@ export default {
         body: JSON.stringify({
           attachment_uuid: attachmentUuid,
           page,
+          request_uuid: v4(),
           ...(this.withDetectExistingFields ? { fields: this.buildExistingFields() } : {})
         })
       }).then(async (response) => {

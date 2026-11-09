@@ -836,6 +836,7 @@ export default {
         },
         body: JSON.stringify({
           attachment_uuid: this.template.schema.map((item) => item.attachment_uuid),
+          request_uuid: v4(),
           ...(this.withDetectExistingFields ? { fields: this.buildExistingFields() } : {})
         })
       }).then(async (response) => {

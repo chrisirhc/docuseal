@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_10_25_120002) do
+ActiveRecord::Schema[8.1].define(version: 2026_11_06_090000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "btree_gin"
   enable_extension "pg_catalog.plpgsql"
@@ -157,6 +157,65 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_25_120002) do
     t.datetime "updated_at", null: false
     t.string "username", null: false
     t.index ["username"], name: "index_console1984_users_on_username"
+  end
+
+  create_table "detection_predictions", force: :cascade do |t|
+    t.float "confidence", null: false
+    t.datetime "created_at", null: false
+    t.integer "detection_position"
+    t.bigint "detection_run_id", null: false
+    t.string "field_type", null: false
+    t.float "h", null: false
+    t.integer "page", null: false
+    t.integer "position", null: false
+    t.string "stage", null: false
+    t.string "uuid"
+    t.float "w", null: false
+    t.float "x", null: false
+    t.float "y", null: false
+    t.index ["detection_run_id", "stage", "page", "position"], name: "index_detection_predictions_on_position", unique: true
+    t.index ["uuid"], name: "index_detection_predictions_on_uuid", unique: true
+  end
+
+  create_table "detection_run_pages", force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.bigint "detection_run_id", null: false
+    t.integer "image_height"
+    t.integer "image_width"
+    t.integer "page", null: false
+    t.float "page_height"
+    t.float "page_width"
+    t.integer "rotation"
+    t.index ["detection_run_id", "page"], name: "index_detection_run_pages_on_detection_run_id_and_page", unique: true
+  end
+
+  create_table "detection_runs", force: :cascade do |t|
+    t.bigint "account_id", null: false
+    t.string "attachment_uuid", null: false
+    t.integer "attempt", default: 1, null: false
+    t.datetime "created_at", null: false
+    t.string "error_class"
+    t.datetime "finished_at"
+    t.string "model_sha256"
+    t.string "model_version"
+    t.integer "page"
+    t.text "parameters", null: false
+    t.integer "preprocessing_version", null: false
+    t.string "request_uuid"
+    t.integer "schema_version", null: false
+    t.bigint "source_byte_size"
+    t.string "source_kind"
+    t.string "source_sha256"
+    t.datetime "started_at", null: false
+    t.string "status", null: false
+    t.bigint "template_id", null: false
+    t.datetime "updated_at", null: false
+    t.bigint "user_id"
+    t.string "uuid", null: false
+    t.index ["account_id", "source_sha256"], name: "index_detection_runs_on_account_id_and_source_sha256"
+    t.index ["account_id"], name: "index_detection_runs_on_account_id"
+    t.index ["template_id", "request_uuid", "attachment_uuid", "attempt"], name: "index_detection_runs_on_request", unique: true
+    t.index ["uuid"], name: "index_detection_runs_on_uuid", unique: true
   end
 
   create_table "document_generation_events", force: :cascade do |t|
@@ -600,6 +659,10 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_25_120002) do
   add_foreign_key "account_linked_accounts", "accounts", column: "linked_account_id"
   add_foreign_key "active_storage_attachments", "active_storage_blobs", column: "blob_id"
   add_foreign_key "active_storage_variant_records", "active_storage_blobs", column: "blob_id"
+  add_foreign_key "detection_predictions", "detection_runs"
+  add_foreign_key "detection_run_pages", "detection_runs"
+  add_foreign_key "detection_runs", "accounts"
+  add_foreign_key "detection_runs", "templates"
   add_foreign_key "document_generation_events", "submitters"
   add_foreign_key "document_metadata", "accounts"
   add_foreign_key "dynamic_document_versions", "dynamic_documents"

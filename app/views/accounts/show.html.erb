@@ -132,6 +132,29 @@
             </div>
           <% end %>
         <% end %>
+        <% account_config = AccountConfig.find_or_initialize_by(account: current_account, key: AccountConfig::RECORD_FIELD_DETECTIONS_KEY) %>
+        <% if can?(:manage, account_config) && !Docuseal.multitenant? %>
+          <%= form_for account_config, url: account_configs_path, method: :post do |f| %>
+            <%= f.hidden_field :key %>
+            <div class="flex items-center justify-between gap-4 py-2.5">
+              <div class="flex items-center space-x-1">
+                <span class="text-left"><%= t('record_field_detection_results') %></span>
+                <span class="tooltip tooltip-top hidden md:flex cursor-pointer" data-tip="<%= t('keep_the_fields_suggested_by_autodetect_with_their_positions_and_scores_so_detection_can_be_measured_and_improved_on_this_instance_document_text_and_filled_values_are_not_stored') %>">
+                  <%= svg_icon('info_circle', class: 'w-4 h-4 shrink-0') %>
+                </span>
+              </div>
+              <submit-form data-on="change" class="flex">
+                <%= f.check_box :value, class: 'toggle', checked: account_config.value != false %>
+              </submit-form>
+            </div>
+          <% end %>
+          <% if (detection_runs_count = DetectionRun.where(account_id: current_account.id).count).positive? %>
+            <div class="flex items-center justify-between gap-4 py-2.5">
+              <span><%= t('recorded_field_detections_count', count: detection_runs_count) %></span>
+              <%= button_to t('clear'), settings_detection_records_path, method: :delete, class: 'btn btn-sm btn-outline btn-error px-4', data: { turbo_confirm: t('delete_all_recorded_field_detections_for_this_account_templates_and_fields_are_not_affected') } %>
+            </div>
+          <% end %>
+        <% end %>
         <% account_config = AccountConfig.find_or_initialize_by(account: current_account, key: AccountConfig::ALLOW_TO_DECLINE_KEY) %>
         <% if can?(:manage, account_config) && (!turbo_native_ios? || !Docuseal.multitenant? || can?(:manage, :disable_decline)) %>
           <%= form_for account_config, url: account_configs_path, method: :post do |f| %>

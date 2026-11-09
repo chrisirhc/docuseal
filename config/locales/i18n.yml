@@ -244,6 +244,11 @@ en: &en
   require_signing_reason: Require signing reason
   allow_typed_text_signatures: Allow typed text signatures
   allow_to_resubmit_completed_forms: Allow to resubmit completed forms
+  record_field_detection_results: Record field detection results
+  keep_the_fields_suggested_by_autodetect_with_their_positions_and_scores_so_detection_can_be_measured_and_improved_on_this_instance_document_text_and_filled_values_are_not_stored: Keep the fields suggested by autodetect, with their positions and scores, so detection can be measured and improved on this instance. Document text and filled values are not stored.
+  recorded_field_detections_count: 'Recorded field detections: %{count}'
+  delete_all_recorded_field_detections_for_this_account_templates_and_fields_are_not_affected: 'Delete all recorded field detections for this account? Templates and fields are not affected.'
+  field_detection_records_cleared: 'Cleared %{count} recorded field detections'
   allow_to_decline_documents: Allow to decline documents
   allow_to_delegate_documents: Allow to delegate documents
   remember_and_pre_fill_signatures: Remember and pre-fill signatures
@@ -1398,6 +1403,11 @@ es: &es
   require_signing_reason: Requerir motivo de firma
   allow_typed_text_signatures: Permitir firmas de texto mecanografiadas
   allow_to_resubmit_completed_forms: Permitir reenviar formularios completados
+  record_field_detection_results: Registrar resultados de detección de campos
+  keep_the_fields_suggested_by_autodetect_with_their_positions_and_scores_so_detection_can_be_measured_and_improved_on_this_instance_document_text_and_filled_values_are_not_stored: Conservar los campos sugeridos por la detección automática, con sus posiciones y puntuaciones, para medir y mejorar la detección en esta instancia. No se guardan el texto del documento ni los valores rellenados.
+  recorded_field_detections_count: 'Detecciones de campos registradas: %{count}'
+  delete_all_recorded_field_detections_for_this_account_templates_and_fields_are_not_affected: '¿Eliminar todas las detecciones de campos registradas de esta cuenta? Las plantillas y los campos no se ven afectados.'
+  field_detection_records_cleared: 'Se eliminaron %{count} detecciones de campos registradas'
   allow_to_decline_documents: Permitir rechazar documentos
   allow_to_delegate_documents: Permitir delegar documentos
   remember_and_pre_fill_signatures: Recordar y prellenar firmas
@@ -2562,6 +2572,11 @@ it: &it
   require_signing_reason: Richiedere il motivo della firma
   allow_typed_text_signatures: Permettere firme con testo digitato
   allow_to_resubmit_completed_forms: Permettere di reinviare i moduli completati
+  record_field_detection_results: Registra i risultati del rilevamento dei campi
+  keep_the_fields_suggested_by_autodetect_with_their_positions_and_scores_so_detection_can_be_measured_and_improved_on_this_instance_document_text_and_filled_values_are_not_stored: Conserva i campi suggeriti dal rilevamento automatico, con posizioni e punteggi, per misurare e migliorare il rilevamento su questa istanza. Il testo del documento e i valori compilati non vengono salvati.
+  recorded_field_detections_count: 'Rilevamenti di campi registrati: %{count}'
+  delete_all_recorded_field_detections_for_this_account_templates_and_fields_are_not_affected: 'Eliminare tutti i rilevamenti di campi registrati per questo account? Modelli e campi non vengono modificati.'
+  field_detection_records_cleared: 'Eliminati %{count} rilevamenti di campi registrati'
   allow_to_decline_documents: Permettere di rifiutare i documenti
   allow_to_delegate_documents: Permettere di delegare i documenti
   remember_and_pre_fill_signatures: Ricordare e precompilare le firme
@@ -3712,6 +3727,11 @@ fr: &fr
   require_signing_reason: Exiger un motif de signature
   allow_typed_text_signatures: Autoriser les signatures tapées
   allow_to_resubmit_completed_forms: Autoriser la nouvelle soumission des formulaires complétés
+  record_field_detection_results: Enregistrer les résultats de détection des champs
+  keep_the_fields_suggested_by_autodetect_with_their_positions_and_scores_so_detection_can_be_measured_and_improved_on_this_instance_document_text_and_filled_values_are_not_stored: Conserver les champs suggérés par la détection automatique, avec leurs positions et scores, pour mesurer et améliorer la détection sur cette instance. Le texte du document et les valeurs saisies ne sont pas enregistrés.
+  recorded_field_detections_count: 'Détections de champs enregistrées : %{count}'
+  delete_all_recorded_field_detections_for_this_account_templates_and_fields_are_not_affected: 'Supprimer toutes les détections de champs enregistrées pour ce compte ? Les modèles et les champs ne sont pas modifiés.'
+  field_detection_records_cleared: '%{count} détections de champs enregistrées supprimées'
   allow_to_decline_documents: Autoriser le refus de documents
   allow_to_delegate_documents: Autoriser la délégation de documents
   remember_and_pre_fill_signatures: Mémoriser et pré-remplir les signatures
@@ -4872,6 +4892,11 @@ pt: &pt
   require_signing_reason: Requerer motivo para assinatura
   allow_typed_text_signatures: Permitir assinaturas digitadas
   allow_to_resubmit_completed_forms: Permitir reenviar formulários concluídos
+  record_field_detection_results: Registrar resultados da detecção de campos
+  keep_the_fields_suggested_by_autodetect_with_their_positions_and_scores_so_detection_can_be_measured_and_improved_on_this_instance_document_text_and_filled_values_are_not_stored: Manter os campos sugeridos pela detecção automática, com suas posições e pontuações, para medir e melhorar a detecção nesta instância. O texto do documento e os valores preenchidos não são armazenados.
+  recorded_field_detections_count: 'Detecções de campos registradas: %{count}'
+  delete_all_recorded_field_detections_for_this_account_templates_and_fields_are_not_affected: 'Excluir todas as detecções de campos registradas desta conta? Modelos e campos não são afetados.'
+  field_detection_records_cleared: '%{count} detecções de campos registradas excluídas'
   allow_to_decline_documents: Permitir recusar documentos
   allow_to_delegate_documents: Permitir delegar documentos
   remember_and_pre_fill_signatures: Lembrar e preencher assinaturas automaticamente
@@ -6035,6 +6060,11 @@ de: &de
   require_signing_reason: Grund für die Signatur erforderlich
   allow_typed_text_signatures: Getippte Unterschriften zulassen
   allow_to_resubmit_completed_forms: Erneutes Einreichen abgeschlossener Formulare zulassen
+  record_field_detection_results: Ergebnisse der Felderkennung speichern
+  keep_the_fields_suggested_by_autodetect_with_their_positions_and_scores_so_detection_can_be_measured_and_improved_on_this_instance_document_text_and_filled_values_are_not_stored: Von der automatischen Erkennung vorgeschlagene Felder mit Position und Bewertung speichern, um die Erkennung auf dieser Instanz zu messen und zu verbessern. Dokumenttext und ausgefüllte Werte werden nicht gespeichert.
+  recorded_field_detections_count: 'Gespeicherte Felderkennungen: %{count}'
+  delete_all_recorded_field_detections_for_this_account_templates_and_fields_are_not_affected: 'Alle gespeicherten Felderkennungen dieses Kontos löschen? Vorlagen und Felder bleiben unverändert.'
+  field_detection_records_cleared: '%{count} gespeicherte Felderkennungen gelöscht'
   allow_to_decline_documents: Ablehnen von Dokumenten erlauben
   allow_to_delegate_documents: Delegieren von Dokumenten erlauben
   remember_and_pre_fill_signatures: Signaturen merken und vorab ausfüllen
@@ -7726,6 +7756,11 @@ nl: &nl
   require_signing_reason: Reden voor ondertekening verplicht stellen
   allow_typed_text_signatures: Handtekeningen met getypte tekst toestaan
   allow_to_resubmit_completed_forms: Opnieuw indienen van voltooide formulieren toestaan
+  record_field_detection_results: Resultaten van velddetectie vastleggen
+  keep_the_fields_suggested_by_autodetect_with_their_positions_and_scores_so_detection_can_be_measured_and_improved_on_this_instance_document_text_and_filled_values_are_not_stored: Bewaar de door automatische detectie voorgestelde velden met hun posities en scores, zodat detectie op deze instantie kan worden gemeten en verbeterd. Documenttekst en ingevulde waarden worden niet opgeslagen.
+  recorded_field_detections_count: 'Vastgelegde velddetecties: %{count}'
+  delete_all_recorded_field_detections_for_this_account_templates_and_fields_are_not_affected: 'Alle vastgelegde velddetecties van dit account verwijderen? Sjablonen en velden blijven ongewijzigd.'
+  field_detection_records_cleared: '%{count} vastgelegde velddetecties verwijderd'
   allow_to_decline_documents: Weigeren van documenten toestaan
   allow_to_delegate_documents: Delegeren van documenten toestaan
   remember_and_pre_fill_signatures: Handtekeningen onthouden en vooraf invullen

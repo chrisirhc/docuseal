@@ -84,6 +84,9 @@ module Templates
 
       fields = sort_fields(fields, y_threshold: 10.0 / image.height)
 
+      detections = fields.map(&:to_h)
+      sources = fields.dup
+
       fields = fields.map do |f|
         {
           uuid: SecureRandom.uuid,
@@ -101,7 +104,16 @@ module Templates
         }
       end
 
-      yield [attachment&.uuid, 0, fields] if block_given?
+      if block_given?
+        provenance = build_provenance(
+          detections:, sources:, page_fields: fields, positions: positions_by_identity(sources),
+          page: { image_width: image.width, image_height: image.height },
+          parameters: { confidence:, confidence_floor: confidence, nms:, nmm:, temperature:, split_page:,
+                        aspect_ratio:, padding:, regexp_type: false }
+        )
+
+        yield [attachment&.uuid, 0, fields, provenance]
+      end
 
       [fields, nil]
     end
@@ -141,6 +153,9 @@ module Templates
 
         fields = sort_fields(fields, y_threshold: 10.0 / current_args[:image].height)
 
+        detections = fields.map(&:to_h)
+        positions = positions_by_identity(fields)
+
         text_fields = extract_text_fields_from_page(current_page)
         line_fields = extract_line_fields_from_page(current_page)
 
@@ -170,7 +185,18 @@ module Templates
           }
         end
 
-        yield [attachment&.uuid, current_page_number, page_fields] if block_given?
+        if block_given?
+          provenance = build_provenance(
+            detections:, sources: field_nodes.map(&:elem), page_fields:, positions:,
+            page: { image_width: current_args[:image].width, image_height: current_args[:image].height,
+                    page_width: current_page.width, page_height: current_page.height,
+                    rotation: current_page.rotation },
+            parameters: { confidence:, confidence_floor: infer_opts[:confidence], nms:, nmm:, temperature:,
+                          split_page:, aspect_ratio:, padding:, regexp_type: }
+          )
+
+          yield [attachment&.uuid, current_page_number, page_fields, provenance]
+        end
 
         all_fields.concat(page_fields)
 
@@ -185,6 +211,24 @@ module Templates
       [all_fields, head_node]
     ensure
       doc.close
+    end
+
+    def positions_by_identity(fields)
+      fields.each_with_index.with_object({}.compare_by_identity) { |(field, index), acc| acc[field] = index }
+    end
+
+    # Heuristics mutate fields in place, so detections must be copied before they run.
+    def build_provenance(detections:, sources:, page_fields:, positions:, page:, parameters:)
+      suggestions = sources.zip(page_fields).map do |source, page_field|
+        area = page_field[:areas].first
+
+        {
+          uuid: page_field[:uuid], detection_position: positions[source], type: page_field[:type],
+          x: area[:x], y: area[:y], w: area[:w], h: area[:h], confidence: source.confidence
+        }
+      end
+
+      { detections:, suggestions:, page:, parameters: }
     end
 
     def prepare_page_image(page, inference:, padding:)
