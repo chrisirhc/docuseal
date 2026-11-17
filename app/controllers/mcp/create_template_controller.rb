@@ -30,7 +30,7 @@ module Mcp
       }
     }.freeze
 
-    # rubocop:disable Metrics/AbcSize, Metrics/MethodLength
+    # rubocop:disable-next Metrics/AbcSize, Metrics/MethodLength
     def call
       account = current_user.account
 
@@ -66,7 +66,9 @@ module Mcp
         @template.save!
 
         documents, = Templates::CreateAttachments.call(@template, { files: [file] }, extract_fields: true)
-        schema = documents.map { |doc| { attachment_uuid: doc.uuid, name: doc.filename.base } }
+        schema = documents.map do |doc|
+          { attachment_uuid: doc.uuid, name: FilenameUtils.basename(doc.blob[:filename]) }
+        end
 
         if @template.fields.blank?
           @template.fields = Templates::ProcessDocument.normalize_attachment_fields(@template, documents)
@@ -87,6 +89,5 @@ module Mcp
         edit_url: edit_template_url(@template)
       )
     end
-    # rubocop:enable Metrics/AbcSize, Metrics/MethodLength
   end
 end

@@ -11,7 +11,7 @@ module Api
     before_action :set_noindex_headers
     before_action :set_security_headers
 
-    # rubocop:disable Metrics
+    # rubocop:disable-next Metrics
     def show
       blob_uuid, purp, exp = ApplicationRecord.signed_id_verifier.verified(params[:signed_uuid])
 
@@ -34,6 +34,12 @@ module Api
       @record = attachment.record
       @record = @record.record if @record.is_a?(ActiveStorage::Attachment)
 
+      if DetectBrowserDevice.search_bot?(request.user_agent)
+        Rollbar.warning("Search bot: #{@record.class.name} #{@record.id}") if defined?(Rollbar)
+
+        raise ActionController::RoutingError, 'Not Found'
+      end
+
       authorization_check!(attachment, @record, exp)
 
       if request.headers['Range'].present?
@@ -53,7 +59,6 @@ module Api
         end
       end
     end
-    # rubocop:enable Metrics
 
     private
 
