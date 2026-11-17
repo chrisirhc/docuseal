@@ -1,0 +1,45 @@
+name: docuseal-dev
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    command: sleep infinity
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      # No database name here: config/database.yml supplies docuseal_dev and docuseal_test.
+      DATABASE_URL: postgres://postgres:postgres@postgres:5432
+      SHAKAPACKER_DEV_SERVER_HOST: 0.0.0.0
+      # The fieldlab detection service on the host. Unset it to use the built-in detector.
+      FIELDLAB_URL: ${FIELDLAB_URL-http://host.docker.internal:8765}
+    extra_hosts:
+      - host.docker.internal:host-gateway
+    ports:
+      - 127.0.0.1:13020:3000
+      - 127.0.0.1:3035:3035
+    volumes:
+      - ..:/workspace:cached
+      # Gems and node modules hold binaries built for Linux, so they stay out of the host checkout.
+      - bundle:/usr/local/bundle
+      - node_modules:/workspace/node_modules
+
+  postgres:
+    image: postgres:18
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    volumes:
+      - pg_data:/var/lib/postgresql
+
+volumes:
+  bundle:
+  node_modules:
+  pg_data:

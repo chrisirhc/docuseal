@@ -1,0 +1,17 @@
+{
+  "name": "DocuSeal",
+  "dockerComposeFile": "docker-compose.yml",
+  "service": "app",
+  "workspaceFolder": "/workspace",
+  "postCreateCommand": ".devcontainer/setup.sh",
+  "forwardPorts": [3000, 3035],
+  "portsAttributes": {
+    "3000": { "label": "Rails" },
+    "3035": { "label": "Shakapacker dev server", "onAutoForward": "silent" }
+  },
+  "customizations": {
+    "vscode": {
+      "extensions": ["Shopify.ruby-lsp", "Vue.volar", "dbaeumer.vscode-eslint"]
+    }
+  }
+}
