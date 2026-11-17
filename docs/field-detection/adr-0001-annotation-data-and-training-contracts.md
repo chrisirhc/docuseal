@@ -66,7 +66,9 @@ fully usable.
 - `page`: the requested page, or null for the whole document.
 - `status`: `running`, `completed`, or `failed`.
 - `source_sha256`, `source_byte_size`, `source_kind` (`pdf` or `image`).
-- `model_sha256`, `model_version` (`v1` or `v2` input signature).
+- `model_sha256`, `model_version` (`v1` or `v2` input signature). For a run answered by an
+  external detector these hold its name, such as `fieldlab/hybrid`, and the hash it reports.
+  See [fieldlab](fieldlab.md).
 - `preprocessing_version`, `schema_version`.
 - `parameters`: thresholds and rendering options as JSON text.
 - `error_class`, `started_at`, `finished_at`.

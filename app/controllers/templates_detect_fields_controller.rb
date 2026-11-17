@@ -44,21 +44,30 @@ class TemplatesDetectFieldsController < ApplicationController
   private
 
   def detect_document(sse, document, recorder, page_number)
-    data =
-      if document.image?
-        document.preview_images.joins(:blob).find_by(blob: { filename: ['0.png', '0.jpg'] }).download
-      else
-        document.download
-      end
+    data = Fieldlab.document_data(document)
 
     recorder.record_source(data, kind: document.image? ? 'image' : 'pdf')
 
-    Templates::DetectFields.call(StringIO.new(data), attachment: document,
-                                                     page_number:) do |(attachment_uuid, page, fields, provenance)|
+    emit = lambda do |(attachment_uuid, page, fields, provenance)|
       recorder.record_page(page, provenance)
 
       sse.write({ attachment_uuid:, page:, fields:, detection_run_uuid: recorder.run_uuid }.compact)
     end
+
+    return if Fieldlab.enabled? && detect_with_fieldlab(data, document, page_number, &emit)
+
+    Templates::DetectFields.call(StringIO.new(data), attachment: document, page_number:, &emit)
+  end
+
+  # False when fieldlab could not be reached, so the built-in detector answers instead.
+  def detect_with_fieldlab(data, document, page_number, &)
+    Templates::DetectFieldsRemote.call(data, template: @template, attachment: document, page_number:, &)
+
+    true
+  rescue Templates::DetectFieldsRemote::Unavailable => e
+    Rails.logger.warn("fieldlab: using the built-in detector: #{e.message}")
+
+    false
   end
 
   def replay_run(sse, run)

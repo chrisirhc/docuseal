@@ -58,11 +58,7 @@ module Api
 
       SearchEntries.enqueue_reindex(@template) if @template.saved_change_to_name?
 
-      WebhookUrls.enqueue_events(@template, 'template.updated')
-
-      if @template.saved_change_to_archived_at? && @template.archived_at?
-        WebhookUrls.enqueue_events(@template, 'template.archived')
-      end
+      enqueue_update_events
 
       render json: @template.as_json(only: %i[id updated_at])
     end
@@ -80,6 +76,16 @@ module Api
     end
 
     private
+
+    def enqueue_update_events
+      WebhookUrls.enqueue_events(@template, 'template.updated')
+
+      Fieldlab.enqueue_template_saved(@template)
+
+      return unless @template.saved_change_to_archived_at? && @template.archived_at?
+
+      WebhookUrls.enqueue_events(@template, 'template.archived')
+    end
 
     def preload_relations(templates)
       schema_documents =

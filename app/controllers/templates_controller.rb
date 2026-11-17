@@ -66,6 +66,8 @@ class TemplatesController < ApplicationController
 
     WebhookUrls.enqueue_events(@template, 'template.updated')
 
+    Fieldlab.enqueue_template_saved(@template)
+
     head :ok
   end
 

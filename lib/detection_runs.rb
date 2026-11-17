@@ -60,9 +60,7 @@ module DetectionRuns
         next unless run
 
         DetectionRun.transaction do
-          if run.parameters.blank?
-            run.update!(parameters: provenance[:parameters], model_version: DetectionRuns.model_version)
-          end
+          record_detector(provenance) if run.parameters.blank?
 
           run.pages.create!(page:, **provenance[:page])
 
@@ -74,6 +72,16 @@ module DetectionRuns
     end
 
     private
+
+    # A run starts as the built-in model's. A page from another detector says so in
+    # provenance[:model], and its name and hash then replace the built-in model's.
+    def record_detector(provenance)
+      model = provenance[:model] || {}
+
+      run.update!(parameters: provenance[:parameters],
+                  model_version: model[:version] || DetectionRuns.model_version,
+                  model_sha256: model[:sha256] || run.model_sha256)
+    end
 
     def begin_run
       return create_run(attempt: 1) if @request_uuid.nil?
