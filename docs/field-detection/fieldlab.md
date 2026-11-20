@@ -2,7 +2,7 @@
 
 - Contract: [ADR 0001](adr-0001-annotation-data-and-training-contracts.md)
 - Code: `lib/fieldlab.rb`, `lib/templates/detect_fields_remote.rb`,
-  `app/jobs/send_fieldlab_template_job.rb`
+  `app/jobs/send_fieldlab_template_job.rb`, `app/jobs/send_fieldlab_detected_job.rb`
 
 fieldlab is a separate service for comparing and tuning field detection methods. This app
 can use it as its detector and feed it what authors do, with no extra step for the author.
@@ -19,7 +19,13 @@ fieldlab is where the methods are configured, inspected, debugged, trained and t
 
 1. **Detect fields.** The builder's button sends each page's document to
    `POST /api/detect` and streams fieldlab's fields in the usual shape. If fieldlab cannot
-   be reached before the first page, the built-in detector answers instead.
+   be reached before the first page, the built-in detector answers instead. fieldlab can
+   also answer `use_builtin`, when its page is set to let this app's detector answer. In
+   both cases the built-in detector's fields are then sent to `POST /api/docuseal/detected`
+   by `SendFieldlabDetectedJob` (best effort, like the save below), so fieldlab can score
+   both detectors on the same documents. Each request logs which detector answered, as
+   `fieldlab: Detect fields on template N answered by fieldlab` or `... uses the built-in
+   detector: <reason>`.
 2. **Save.** Each save of a template, from the builder or the API, queues
    `SendFieldlabTemplateJob`. It posts the template's fields to
    `POST /api/docuseal/events`. fieldlab names any document it does not hold, the job
