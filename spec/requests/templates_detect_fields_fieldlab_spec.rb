@@ -68,6 +68,25 @@ RSpec.describe 'Template field detection through fieldlab' do
     expect(DetectionRun.sole).to have_attributes(status: 'completed', model_version: 'v2')
   end
 
+  it 'uses the built-in detector when fieldlab asks for it, and reports its answer back' do
+    allow(Fieldlab).to receive_messages(detect: { 'use_builtin' => true, 'reason' => 'set in fieldlab' }, post: {})
+
+    detect
+
+    expect(events.last).to eq('completed' => true)
+    expect(Templates::ImageToFields).to have_received(:call)
+    expect(DetectionRun.sole).to have_attributes(status: 'completed', model_version: 'v2')
+    expect(SendFieldlabDetectedJob.jobs.size).to eq(1)
+
+    SendFieldlabDetectedJob.drain
+
+    expect(Fieldlab).to have_received(:post) do |path, body:, **|
+      expect(path).to eq('/api/docuseal/detected')
+      expect(JSON.parse(body)).to include('template_id' => template.id, 'attachment_uuid' => attachment_uuid,
+                                          'pages' => [0], 'fields' => [], 'reason' => include('set in fieldlab'))
+    end
+  end
+
   it 'sends a saved template to fieldlab, and its file when fieldlab asks for it' do
     requests = []
 

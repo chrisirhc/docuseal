@@ -27,8 +27,15 @@ module Templates
       fields
     end
 
+    # fieldlab may answer `use_builtin` when it is set, on its own page, to let this app's
+    # detector answer so the two can be compared. Like a failure, that is only honoured
+    # before the first page.
     def fetch(data, template:, attachment:, page:, first:)
-      Fieldlab.detect(data, template:, attachment_uuid: attachment.uuid, page:)
+      reply = Fieldlab.detect(data, template:, attachment_uuid: attachment.uuid, page:)
+
+      raise Fieldlab::Error, "fieldlab asked for the built-in detector (#{reply['reason']})" if reply['use_builtin']
+
+      reply
     rescue Fieldlab::Error => e
       raise unless first
 

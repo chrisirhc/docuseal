@@ -58,6 +58,21 @@ module Fieldlab
     post('/api/docuseal/events', body: payload.to_json, content_type: 'application/json')
   end
 
+  # The built-in detector answered "Detect fields". Its fields go to fieldlab as the run
+  # `docuseal-builtin`, so a later save scores it beside fieldlab's own runs.
+  def detected(payload)
+    post('/api/docuseal/detected', body: payload.merge('instance' => instance).to_json,
+                                   content_type: 'application/json')
+  end
+
+  def enqueue_detected(template:, attachment_uuid:, pages:, fields:, seconds:, reason:)
+    return unless enabled? && DetectionRuns.capture_enabled?(template.account_id)
+
+    payload = { template_id: template.id, attachment_uuid:, pages:, fields:, seconds:, reason: }
+
+    SendFieldlabDetectedJob.perform_async('payload' => payload.as_json)
+  end
+
   def enqueue_template_saved(template)
     return unless enabled? && DetectionRuns.capture_enabled?(template.account_id)
 

@@ -54,20 +54,46 @@ class TemplatesDetectFieldsController < ApplicationController
       sse.write({ attachment_uuid:, page:, fields:, detection_run_uuid: recorder.run_uuid }.compact)
     end
 
-    return if Fieldlab.enabled? && detect_with_fieldlab(data, document, page_number, &emit)
+    unless Fieldlab.enabled?
+      return Templates::DetectFields.call(StringIO.new(data), attachment: document, page_number:, &emit)
+    end
 
-    Templates::DetectFields.call(StringIO.new(data), attachment: document, page_number:, &emit)
+    reason = detect_with_fieldlab(data, document, page_number, &emit)
+
+    detect_builtin_and_report(data, document, page_number, reason, &emit) unless reason.nil?
   end
 
-  # False when fieldlab could not be reached, so the built-in detector answers instead.
+  # nil when fieldlab answered. Otherwise why the built-in detector must answer: fieldlab
+  # could not be reached, or it was set on its own page to let this app's detector answer.
   def detect_with_fieldlab(data, document, page_number, &)
     Templates::DetectFieldsRemote.call(data, template: @template, attachment: document, page_number:, &)
 
-    true
-  rescue Templates::DetectFieldsRemote::Unavailable => e
-    Rails.logger.warn("fieldlab: using the built-in detector: #{e.message}")
+    Rails.logger.info("fieldlab: Detect fields on template #{@template.id} answered by fieldlab")
 
-    false
+    nil
+  rescue Templates::DetectFieldsRemote::Unavailable => e
+    Rails.logger.warn("fieldlab: Detect fields on template #{@template.id} uses the built-in detector: #{e.message}")
+
+    e.message
+  end
+
+  # Runs the built-in detector and sends its fields to fieldlab in the background, so the
+  # lab holds both detectors' answers on the same documents.
+  def detect_builtin_and_report(data, document, page_number, reason)
+    started = Process.clock_gettime(Process::CLOCK_MONOTONIC)
+    pages = []
+    fields = []
+
+    Templates::DetectFields.call(StringIO.new(data), attachment: document, page_number:) do |event|
+      pages << event[1]
+      fields.concat(event[2])
+
+      yield event
+    end
+
+    seconds = (Process.clock_gettime(Process::CLOCK_MONOTONIC) - started).round(2)
+
+    Fieldlab.enqueue_detected(template: @template, attachment_uuid: document.uuid, pages:, fields:, seconds:, reason:)
   end
 
   def replay_run(sse, run)
