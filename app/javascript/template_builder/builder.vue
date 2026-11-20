@@ -879,6 +879,9 @@
               <span v-if="detectingAnalyzingProgress">
                 {{ Math.round(detectingAnalyzingProgress * 100) }}% {{ t('analyzing_') }}
               </span>
+              <span v-else-if="detectingWaitingSeconds !== null">
+                {{ t('asking_fieldlab_') }} {{ detectingWaitingSeconds }}s
+              </span>
               <span v-else>
                 {{ t('processing_') }}
               </span>
@@ -1384,6 +1387,7 @@ export default {
       isDetectingPageFields: false,
       detectFieldsQueue: [],
       detectingAnalyzingProgress: null,
+      detectingWaitingSeconds: null,
       detectingFieldsAddedCount: null,
       selectedSubmitter: null,
       showDrawField: false,
@@ -3868,6 +3872,7 @@ export default {
 
       this.isDetectingPageFields = true
       this.detectingAnalyzingProgress = null
+      this.detectingWaitingSeconds = null
       this.detectingFieldsAddedCount = null
 
       let totalFieldsAdded = 0
@@ -3951,6 +3956,8 @@ export default {
                 break
               } else if (data.analyzing) {
                 this.detectingAnalyzingProgress = data.progress
+              } else if (data.waiting) {
+                this.detectingWaitingSeconds = data.seconds
               } else if (data.completed) {
                 if (data.submitters) {
                   if (!hadFieldsBeforeDetection) {
@@ -4051,6 +4058,7 @@ export default {
       }).finally(() => {
         this.isDetectingPageFields = false
         this.detectingAnalyzingProgress = null
+        this.detectingWaitingSeconds = null
         this.detectingFieldsAddedCount = totalFieldsAdded
 
         setTimeout(() => {

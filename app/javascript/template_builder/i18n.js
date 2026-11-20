@@ -97,6 +97,7 @@ const en = {
   or_drag_and_drop_files: 'or drag and drop files',
   uploading: 'Uploading',
   processing_: 'Processing...',
+  asking_fieldlab_: 'Asking fieldlab...',
   add_pdf_documents_or_images: 'Add PDF documents or images',
   add_documents_or_images: 'Add documents or images',
   add_a_new_document: 'Add a new document',

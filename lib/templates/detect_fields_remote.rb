@@ -9,14 +9,19 @@ module Templates
     # fall back to the built-in detector without sending a page twice.
     Unavailable = Class.new(StandardError)
 
+    # How often `waiting` hears that fieldlab has not answered yet.
+    WAITING_INTERVAL = 2
+
     module_function
 
-    def call(data, template:, attachment:, page_number: nil)
+    # `waiting`, when given, is called with the page and the seconds spent so far every
+    # WAITING_INTERVAL seconds until fieldlab answers, so the builder can show progress.
+    def call(data, template:, attachment:, page_number: nil, waiting: nil)
       pages = page_number ? [page_number] : (0...page_count(data, attachment)).to_a
       fields = []
 
       pages.each_with_index do |page, index|
-        reply = fetch(data, template:, attachment:, page:, first: index.zero?)
+        reply = while_waiting(page, waiting) { fetch(data, template:, attachment:, page:, first: index.zero?) }
         page_fields = reply['fields'].map { |field| build_field(field, attachment.uuid) }
 
         yield [attachment.uuid, page, page_fields, provenance(reply, page_fields)] if block_given?
@@ -40,6 +45,24 @@ module Templates
       raise unless first
 
       raise Unavailable, e.message
+    end
+
+    # Runs the request on its own thread and reports the wait. The value or the exception
+    # of the request is passed on unchanged.
+    def while_waiting(page, waiting, &)
+      return yield unless waiting
+
+      started = Process.clock_gettime(Process::CLOCK_MONOTONIC)
+      request = Thread.new(&)
+      request.report_on_exception = false
+
+      until request.join(WAITING_INTERVAL)
+        waiting.call(page, (Process.clock_gettime(Process::CLOCK_MONOTONIC) - started).round)
+      end
+
+      request.value
+    ensure
+      request&.kill if request&.alive?
     end
 
     def page_count(data, attachment)

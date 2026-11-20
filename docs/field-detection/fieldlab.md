@@ -25,7 +25,9 @@ fieldlab is where the methods are configured, inspected, debugged, trained and t
    by `SendFieldlabDetectedJob` (best effort, like the save below), so fieldlab can score
    both detectors on the same documents. Each request logs which detector answered, as
    `fieldlab: Detect fields on template N answered by fieldlab` or `... uses the built-in
-   detector: <reason>`.
+   detector: <reason>`. While fieldlab works on a page, the stream sends
+   `{waiting: "fieldlab", page, seconds}` every two seconds, and the builder shows
+   "Asking fieldlab... Ns" instead of a bare spinner.
 2. **Save.** Each save of a template, from the builder or the API, queues
    `SendFieldlabTemplateJob`. It posts the template's fields to
    `POST /api/docuseal/events`. fieldlab names any document it does not hold, the job

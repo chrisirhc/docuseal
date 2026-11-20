@@ -58,15 +58,17 @@ class TemplatesDetectFieldsController < ApplicationController
       return Templates::DetectFields.call(StringIO.new(data), attachment: document, page_number:, &emit)
     end
 
-    reason = detect_with_fieldlab(data, document, page_number, &emit)
+    reason = detect_with_fieldlab(data, document, page_number, sse, &emit)
 
     detect_builtin_and_report(data, document, page_number, reason, &emit) unless reason.nil?
   end
 
   # nil when fieldlab answered. Otherwise why the built-in detector must answer: fieldlab
   # could not be reached, or it was set on its own page to let this app's detector answer.
-  def detect_with_fieldlab(data, document, page_number, &)
-    Templates::DetectFieldsRemote.call(data, template: @template, attachment: document, page_number:, &)
+  def detect_with_fieldlab(data, document, page_number, sse, &)
+    waiting = ->(page, seconds) { sse.write({ waiting: 'fieldlab', page:, seconds: }) }
+
+    Templates::DetectFieldsRemote.call(data, template: @template, attachment: document, page_number:, waiting:, &)
 
     Rails.logger.info("fieldlab: Detect fields on template #{@template.id} answered by fieldlab")
 

@@ -58,6 +58,24 @@ RSpec.describe 'Template field detection through fieldlab' do
     expect(run.predictions.suggestions.pluck(:uuid)).to match_array(page_event['fields'].pluck('uuid'))
   end
 
+  it 'tells the builder it is still waiting while fieldlab works' do
+    stub_const('Templates::DetectFieldsRemote::WAITING_INTERVAL', 0.01)
+    allow(Fieldlab).to receive(:detect) do
+      sleep 0.1
+
+      reply
+    end
+
+    detect
+
+    waiting = events.select { |event| event['waiting'] }
+
+    expect(waiting).not_to be_empty
+    expect(waiting.first).to include('waiting' => 'fieldlab', 'page' => 0)
+    expect(events.find { |event| event['fields'] }['fields'].pluck('type')).to eq(%w[signature checkbox])
+    expect(events.last).to eq('completed' => true)
+  end
+
   it 'falls back to the built-in detector when fieldlab cannot be reached' do
     allow(Fieldlab).to receive(:detect).and_raise(Fieldlab::Error, 'connection refused')
 

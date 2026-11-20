@@ -369,6 +369,9 @@
         <span v-if="analyzingProgress">
           {{ Math.round(analyzingProgress * 100) }}% {{ t('analyzing_') }}
         </span>
+        <span v-else-if="waitingSeconds !== null">
+          {{ fieldPagesLoaded }} / {{ numberOfPages }} {{ t('asking_fieldlab_') }} {{ waitingSeconds }}s
+        </span>
         <span v-else>
           {{ fieldPagesLoaded }} / {{ numberOfPages }} {{ t('processing_') }}
         </span>
@@ -581,6 +584,7 @@ export default {
       isShowAddFieldsPill: false,
       fieldPagesLoaded: null,
       analyzingProgress: 0,
+      waitingSeconds: null,
       newCustomField: null,
       showCustomTab: false,
       defaultFieldsSearch: '',
@@ -870,6 +874,8 @@ export default {
                 break
               } else if (data.analyzing) {
                 this.analyzingProgress = data.progress
+              } else if (data.waiting) {
+                this.waitingSeconds = data.seconds
               } else if (data.completed) {
                 this.fieldPagesLoaded = null
 
@@ -895,6 +901,7 @@ export default {
                 })
 
                 this.fieldPagesLoaded += 1
+                this.waitingSeconds = null
 
                 fields.push(...data.fields)
               }
@@ -908,6 +915,7 @@ export default {
       }).finally(() => {
         this.fieldPagesLoaded = null
         this.analyzingProgress = null
+        this.waitingSeconds = null
         this.isFieldsLoading = false
       })
     },
